@@ -63,13 +63,14 @@ Lidar_sensor_flag = 1
 
 x_pos = []
 y_pos = []
-
+direction = 'f';
+wall = 'r';
 while True:
            
     now = time.time()
-    if now - start > 102:
+    if now - start > 92:
         target_alt = 0
-    if now - start > 105:   
+    if now - start > 95:   
         break
     
     x,y = E100_functions.get_XY(client)
@@ -92,29 +93,97 @@ while True:
     front, right, left, back = E100_functions.get_lidars(client)    # read LIDAR readings
     
     ##adjust the right lidar for corners
-    if( (front < 10) and (back < 10)):
-        left = 1.5
-        right = 8
-        front = alpha_lidar*front + (1-alpha_lidar)*front1
-    elif (x < 19 and x > 15):
-        if y < 15:
-            front = .2*front + .8*front1
-        else:
-            front = 4
-        if left > 10:
-            left = 2.3
-        else:
-            left = alpha_lidar*left + (1-alpha_lidar)*left1
-        right = alpha_lidar*right + (1-alpha_lidar)*right1
-    elif left > 10:
-        left = 2.3
-        front = alpha_lidar*front + (1-alpha_lidar)*front1
-        right = alpha_lidar*right + (1-alpha_lidar)*right1
-    else:
-        left = alpha_lidar*left + (1-alpha_lidar)*left1
-        right = alpha_lidar*right + (1-alpha_lidar)*right1  
-        front = alpha_lidar*front + (1-alpha_lidar)*front1
+    # if( (front < 10) and (back < 10)):
+    #     left = 1.5
+    #     right = 8
+    #     front = alpha_lidar*front + (1-alpha_lidar)*front1
+    # elif (x < 19 and x > 15):
+    #     if y < 15:
+    #         front = .2*front + .8*front1
+    #     else:
+    #         front = 4
+    #     if left > 10:
+    #         left = 2.3
+    #     else:
+    #         left = alpha_lidar*left + (1-alpha_lidar)*left1
+    #     right = alpha_lidar*right + (1-alpha_lidar)*right1
+    # elif left > 10:
+    #     left = 2.3
+    #     front = alpha_lidar*front + (1-alpha_lidar)*front1
+    #     right = alpha_lidar*right + (1-alpha_lidar)*right1
+    # else:
+    #     left = alpha_lidar*left + (1-alpha_lidar)*left1
+    #     right = alpha_lidar*right + (1-alpha_lidar)*right1  
+    #     front = alpha_lidar*front + (1-alpha_lidar)*front1
     
+    if(direction == 'f'):
+        if(front < 10 and back < 10):
+            if(wall == 'r'):
+                left = 0.5
+                right = alpha_lidar*right + (1-alpha_lidar)*right1 
+                front = alpha_lidar*front + (1-alpha_lidar)*front1
+            else:
+                right = 0.5
+                left = alpha_lidar*left + (1-alpha_lidar)*left1
+                front = alpha_lidar*front + (1-alpha_lidar)*front1
+        elif(right<5 and front < 10 and left < 8):
+                target_alt = 0;
+        elif(wall == 'r' and right < 4 and front < 10):
+            direction = 'b'
+            left =  2
+            right = alpha_lidar*right + (1-alpha_lidar)*right1
+            front = 4
+        elif(wall == 'l' and left < 4 and front < 10):
+            direction = 'b'
+            right =  2
+            left = alpha_lidar*left + (1-alpha_lidar)*left1
+            front =  2
+        else:
+            if(wall == 'r'):
+                right = alpha_lidar*right + (1-alpha_lidar)*right1  
+                left =  2*.8 + .2*left1
+            else:
+                left = alpha_lidar*left + (1-alpha_lidar)*left1
+                right =  2
+            front = alpha_lidar*front + (1-alpha_lidar)*front1
+    #end direction UP
+    elif(direction == 'b'):
+        if(front < 10 and back < 10):
+            if(wall == 'r'):
+                left = 0.5
+                right = alpha_lidar*right + (1-alpha_lidar)*right1 
+                front = alpha_lidar*front + (1-alpha_lidar)*front1
+            else:
+                right = 0.5
+                left = alpha_lidar*left + (1-alpha_lidar)*left1
+                front = alpha_lidar*front + (1-alpha_lidar)*front1
+        elif(wall == 'r' and right < 4 and back < 10):
+            direction = 'f'
+            left =  2
+            right = alpha_lidar*right + (1-alpha_lidar)*right1
+            front = alpha_lidar*front + (1-alpha_lidar)*front1
+        elif(wall == 'l' and left < 4 and back < 10):
+            direction = 'f'
+            right =  2
+            left = alpha_lidar*left + (1-alpha_lidar)*left1
+            front = alpha_lidar*front + (1-alpha_lidar)*front1
+        else:
+            if(wall == 'r'):
+                right = alpha_lidar*right + (1-alpha_lidar)*right1  
+                left =  2
+            else:
+                left = alpha_lidar*left + (1-alpha_lidar)*left1
+                right = 2
+            if(back > 18):
+                front = 4
+            else:
+                front = .2*front + (.8)*front1
+#end direction down
+            
+    if(now-start > 10 and altitude < 2):
+        break
+            
+        
     
     
     front1 = front
